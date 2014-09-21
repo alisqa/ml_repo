@@ -1,0 +1,67 @@
+Practical Machine Learning Project - Ali Alqahtani
+========================================================
+I started the project by first examining the data sets both for training and testing. I knew that we needed to reduce the number of predictors especially that there was a lot of NA values. 
+
+I first loaded the caret library and read the training and testing csv files:
+
+```{r}
+library(caret)
+training <- read.csv("pml-training.csv")
+
+```
+
+Then I started the task of data preprocessing. I picked the nearZeroVar function to reduce the dimensionality of data by getting rid of very low variance variables. I did the same for the testing dataset.
+
+```{r}
+nzvTraining <- nearZeroVar(training)
+redTraining <- training[,-nzvTraining]
+```
+
+Also by looking at the testing dataset pml-testing, it appears that many variables have NA values which we can get rid of by using 
+```{r}
+naTraining<-redTraining[,colSums(!is.na(redTraining))>0]
+```
+
+I then sliced the training data to two subsets one for training the model and the other for testing the model fit. I used randomForest package after I had memory issues with caret's random forest "rf". I also removed the variable "X" which I learned from one of the posts at the forum since it was being given an importance of 100% while other predictors were not being used! I checked this using varImp() function.
+
+
+```{r}
+inTrn <- createDataPartition(naTraining$classe, p = 0.7, list = FALSE)
+trn <- naTraining[inTrn,]
+tst <- naTraining[-inTrn,]
+
+#model training using randomForest
+rfMod <- randomForest(classe ~ ., data=trn)
+
+#confusion matrix (out of bag error rate of 0.12%)
+rfMod
+
+Call:
+ randomForest(formula = classe ~ ., data = trn) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 7
+
+        OOB estimate of  error rate: 0.12%
+Confusion matrix:
+     A    B    C    D    E  class.error
+A 3906    0    0    0    0 0.0000000000
+B    2 2655    1    0    0 0.0011286682
+C    0    5 2390    1    0 0.0025041736
+D    0    0    3 2247    2 0.0022202487
+E    0    0    0    2 2523 0.0007920792
+
+
+
+#model testing
+rfPred <- predict(rfMod, tst)
+```
+
+Finally, I applied the the model on the pml-testing data set after I preprocessed it the same way I did for the training data by removing NA value columns, low variance and X variabiles.
+
+```{r}
+rfPredTesting <- predict(rfMod, naTesting)
+```
+
+The results were fully accurate so the out of sample error is considered to be 0%:
+B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
