@@ -4,37 +4,101 @@ I started the project by first examining the data sets both for training and tes
 
 I first loaded the caret library and read the training and testing csv files:
 
-```{r}
-library(caret)
-training <- read.csv("pml-training.csv")
 
+```r
+library(caret)
+```
+
+```
+## Loading required package: lattice
+## Loading required package: ggplot2
+```
+
+```r
+training <- read.csv("pml-training.csv")
+```
+
+```
+## Warning: cannot open file 'pml-training.csv': No such file or directory
+```
+
+```
+## Error: cannot open the connection
 ```
 
 Then I started the task of data preprocessing. I picked the nearZeroVar function to reduce the dimensionality of data by getting rid of very low variance variables. I did the same for the testing dataset.
 
-```{r}
+
+```r
 nzvTraining <- nearZeroVar(training)
+```
+
+```
+## Error: object 'training' not found
+```
+
+```r
 redTraining <- training[,-nzvTraining]
 ```
 
+```
+## Error: object 'training' not found
+```
+
 Also by looking at the testing dataset pml-testing, it appears that many variables have NA values which we can get rid of by using 
-```{r}
+
+```r
 naTraining<-redTraining[,colSums(!is.na(redTraining))>0]
+```
+
+```
+## Error: object 'redTraining' not found
 ```
 
 I then sliced the training data to two subsets one for training the model and the other for testing the model fit. I used randomForest package after I had memory issues with caret's random forest "rf". I also removed the variable "X" which I learned from one of the posts at the forum since it was being given an importance of 100% while other predictors were not being used! I checked this using varImp() function.
 
 
-```{r}
-inTrn <- createDataPartition(naTraining$classe, p = 0.7, list = FALSE)
-trn <- naTraining[inTrn,]
-tst <- naTraining[-inTrn,]
 
+```r
+inTrn <- createDataPartition(naTraining$classe, p = 0.7, list = FALSE)
+```
+
+```
+## Error: object 'naTraining' not found
+```
+
+```r
+trn <- naTraining[inTrn,]
+```
+
+```
+## Error: object 'naTraining' not found
+```
+
+```r
+tst <- naTraining[-inTrn,]
+```
+
+```
+## Error: object 'naTraining' not found
+```
+
+```r
 #model training using randomForest
 rfMod <- randomForest(classe ~ ., data=trn)
+```
 
+```
+## Error: could not find function "randomForest"
+```
+
+```r
 #confusion matrix (out of bag error rate of 0.12%)
 rfMod
+```
+
+```
+## Error: object 'rfMod' not found
 ```
 No. of variables tried at each split: 7
 
@@ -48,15 +112,25 @@ D    0    0    3 2247    2 0.0022202487
 E    0    0    0    2 2523 0.0007920792
 
 
-```{r}
+
+```r
 #model testing
 rfPred <- predict(rfMod, tst)
 ```
 
+```
+## Error: object 'rfMod' not found
+```
+
 Finally, I applied the the model on the pml-testing data set after I preprocessed it the same way I did for the training data by removing NA value columns, low variance and X variabiles.
 
-```{r}
+
+```r
 rfPredTesting <- predict(rfMod, naTesting)
+```
+
+```
+## Error: object 'rfMod' not found
 ```
 
 The results were fully accurate so the out of sample error is considered to be 0%:
